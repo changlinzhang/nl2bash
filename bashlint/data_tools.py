@@ -238,6 +238,28 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
             if lc:
                 for child in node.children:
                     tokens += to_tokens_fun(child)
+        elif node.kind == 'forin':
+            tokens.append("for")
+            tokens += (to_tokens_fun(node.children[0]))
+            tokens.append("in")
+            tokens += (to_tokens_fun(node.children[1]))
+            tokens.append(";")
+            tokens.append("do")
+            tokens += (to_tokens_fun(node.children[2]))
+            tokens.append(";")
+            tokens.append("done")
+        elif node.kind == 'while':
+            tokens.append("while")
+            tokens += (to_tokens_fun(node.children[0]))
+            tokens.append(";")
+            tokens.append("do")
+            tokens += (to_tokens_fun(node.children[1]))
+            tokens.append(";")
+            tokens.append("done")
+        elif node.kind == 'parameter':
+            tokens.append('${')
+            tokens += to_tokens_fun(node.children[0])
+            tokens.append('}')
         return tokens
 
     return to_tokens_fun(node)

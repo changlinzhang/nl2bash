@@ -429,6 +429,8 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
                                     parent=current, lsb=current.get_right_child(),
                                     list_members=token.split(list_separator),
                                     list_separator=list_separator)
+                            elif bast_node.kind == 'word' and len(bast_node.parts) > 0 and bast_node.parts[0].kind == 'parameter':
+                                argument = normalize(bast_node.parts[0], current)
                             else:
                                 argument = ArgumentNode(token, arg_type=next_state.arg_type,
                                     parent=current, lsb=current.get_right_child())
@@ -615,10 +617,12 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
                         sub_command.children.append(repl_str_node2)
                         break
 
-    def normalize(node, current, arg_type=""):
+    def normalize(node: bast.node, current, arg_type=""):
         # recursively normalize each subtree
         if not type(node) is bast.node:
             raise ValueError('type(node) is not bast.node')
+        if not hasattr(node, 'kind'):
+            raise ValueError('node has no attribute named kind')
         if node.kind == 'word':
             # assign fine-grained types
             if node.parts:
@@ -674,7 +678,18 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
                 normalize_command(node, current)
             except AssertionError:
                 raise AssertionError("normalized_command AssertionError")
-        elif hasattr(node, 'parts'):
+        elif node.kind == "for":
+            norm_node = ForInNode()
+            attach_to_tree(norm_node, current)
+            normalize(node.parts[1], norm_node, 'forVariable') # for-loop variable
+            normalize(node.parts[3], norm_node)  # for-loop range
+            normalize(node.parts[6], norm_node)  # for-loop body
+        elif node.kind == "while":
+            norm_node = WhileNode()
+            attach_to_tree(norm_node, current)
+            normalize(node.parts[1], norm_node)
+            normalize(node.parts[3], norm_node)
+        elif hasattr(node, 'parts'):  #XXX: This is a guard line
             for child in node.parts:
                 # skip current node
                 normalize(child, current)
@@ -685,21 +700,24 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
             # not supported
             raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "parameter":
-            # not supported
-            raise ValueError("Unsupported: parameters")
+            norm_node = ParameterNode()
+            attach_to_tree(norm_node, current)
+            normalize(norm_node.parts[0], norm_node)
+            # raise ValueError("Unsupported: parameters")
         elif node.kind == "compound":
-            # not supported
-            raise ValueError("Unsupported: %s" % node.kind)
+            if hasattr(node, 'list') and len(node.list) > 0:
+                if node.list[0].kind == 'for':
+                    normalize(node.list[0], current)
+                elif node.list[0].kind == 'while':
+                    normalize(node.list[0], current)
+                else:
+                    raise ValueError("Unsupported Compound: %s" % node.list[0].kind)
+            else:
+                raise ValueError("Unsupported : %s" % node.kind)
         elif node.kind == "list":
             # not supported
             raise ValueError("Unsupported: %s" % node.kind)
-        elif node.kind == "for":
-            # not supported
-            raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "if":
-            # not supported
-            raise ValueError("Unsupported: %s" % node.kind)
-        elif node.kind == "while":
             # not supported
             raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "until":
