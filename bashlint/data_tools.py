@@ -44,8 +44,8 @@ def get_utilities(ast):
 
 
 def bash_tokenizer(cmd, recover_quotation=True, loose_constraints=False,
-        ignore_flag_order=False, arg_type_only=False, keep_common_args=False, with_flag_head=False,
-        with_flag_argtype=False, with_prefix=False, verbose=False):
+                   ignore_flag_order=False, arg_type_only=False, keep_common_args=False, with_flag_head=False,
+                   with_flag_argtype=False, with_prefix=False, verbose=False):
     """
     Tokenize a bash command.
     """
@@ -92,14 +92,14 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
     def to_tokens_fun(node):
         tokens = []
         if node.is_root():
-            assert(loose_constraints or node.get_num_of_children() == 1)
+            assert (loose_constraints or node.get_num_of_children() == 1)
             if lc:
                 for child in node.children:
                     tokens += to_tokens_fun(child)
             else:
                 tokens = to_tokens_fun(node.children[0])
         elif node.kind == "pipeline":
-            assert(loose_constraints or node.get_num_of_children() > 1)
+            assert (loose_constraints or node.get_num_of_children() > 1)
             if lc and node.get_num_of_children() < 1:
                 tokens.append("|")
             elif lc and node.get_num_of_children() == 1:
@@ -111,7 +111,7 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
                     tokens.append("|")
                 tokens += to_tokens_fun(node.children[-1])
         elif node.kind == "commandsubstitution":
-            assert(loose_constraints or node.get_num_of_children() == 1)
+            assert (loose_constraints or node.get_num_of_children() == 1)
             if lc and node.get_num_of_children() < 1:
                 tokens += ["$(", ")"]
             else:
@@ -119,7 +119,7 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
                 tokens += to_tokens_fun(node.children[0])
                 tokens.append(")")
         elif node.kind == "processsubstitution":
-            assert(loose_constraints or node.get_num_of_children() == 1)
+            assert (loose_constraints or node.get_num_of_children() == 1)
             if lc and node.get_num_of_children() < 1:
                 tokens.append(node.value + "(")
                 tokens.append(")")
@@ -132,13 +132,13 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
             if with_prefix:
                 token = node.prefix + token
             tokens.append(token)
-            children = sorted(node.children, key=lambda x:x.value) \
+            children = sorted(node.children, key=lambda x: x.value) \
                 if ignore_flag_order else node.children
             for child in children:
                 tokens += to_tokens_fun(child)
         elif node.is_option():
-            assert(loose_constraints or node.parent)
-            if '::' in node.value and (node.value.startswith('-exec') or 
+            assert (loose_constraints or node.parent)
+            if '::' in node.value and (node.value.startswith('-exec') or
                                        node.value.startswith('-ok')):
                 value, op = node.value.split('::')
                 token = value
@@ -171,7 +171,7 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
         elif node.kind == 'operator':
             tokens.append(node.value)
         elif node.kind == "binarylogicop":
-            assert(loose_constraints or node.get_num_of_children() == 0)
+            assert (loose_constraints or node.get_num_of_children() == 0)
             if lc and node.get_num_of_children() > 0:
                 for child in node.children[:-1]:
                     tokens += to_tokens_fun(child)
@@ -180,7 +180,7 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
             else:
                 tokens.append(node.value)
         elif node.kind == "unarylogicop":
-            assert(loose_constraints or node.get_num_of_children() == 0)
+            assert (loose_constraints or node.get_num_of_children() == 0)
             if lc and node.get_num_of_children() > 0:
                 if node.associate == nast.UnaryLogicOpNode.RIGHT:
                     tokens.append(node.value)
@@ -191,27 +191,27 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
             else:
                 tokens.append(node.value)
         elif node.kind == "bracket":
-            assert(loose_constraints or node.get_num_of_children() >= 1)
+            assert (loose_constraints or node.get_num_of_children() >= 1)
             if lc and node.get_num_of_children() < 2:
                 for child in node.children:
                     tokens += to_tokens_fun(child)
             else:
                 tokens.append("\\(")
-                for i in xrange(len(node.children)-1):
+                for i in xrange(len(node.children) - 1):
                     tokens += to_tokens_fun(node.children[i])
                 tokens += to_tokens_fun(node.children[-1])
                 tokens.append("\\)")
         elif node.kind == "nt":
-            assert(loose_constraints or node.get_num_of_children() > 0)
+            assert (loose_constraints or node.get_num_of_children() > 0)
             tokens.append("(")
             for child in node.children:
                 tokens += to_tokens_fun(child)
             tokens.append(")")
         elif node.is_argument() or node.kind in ["t"]:
-            assert(loose_constraints or node.get_num_of_children() == 0)
+            assert (loose_constraints or node.get_num_of_children() == 0)
             if arg_type_only and node.is_open_vocab():
                 if (keep_common_args and node.parent.is_utility() and
-                    node.parent.value == 'find' and node.value in bash.find_common_args):
+                        node.parent.value == 'find' and node.value in bash.find_common_args):
                     # keep frequently-occurred arguments in the vocabulary
                     # TODO: define the criteria for "common args"
                     token = node.value
@@ -278,19 +278,20 @@ def ast2template(node, loose_constraints=False, ignore_flag_order=False,
     argument types flags are alphabetically ordered.
     """
     tokens = ast2tokens(node, loose_constraints, ignore_flag_order,
-                        arg_type_only=arg_type_only, 
+                        arg_type_only=arg_type_only,
                         indexing_args=indexing_args,
                         keep_common_args=keep_common_args)
     return ' '.join(tokens)
 
+
 def cmd2template(cmd, recover_quotation=True, arg_type_only=True,
-                loose_constraints=False, verbose=False):
+                 loose_constraints=False, verbose=False):
     """
     Convert a bash command to a template that contains only reserved words
     and argument types flags are alphabetically ordered.
     """
     tree = lint.normalize_ast(cmd, recover_quotation, verbose=verbose)
-    return ast2template(tree, loose_constraints=loose_constraints, 
+    return ast2template(tree, loose_constraints=loose_constraints,
                         arg_type_only=arg_type_only)
 
 
@@ -304,7 +305,7 @@ def pretty_print(node, depth=0):
             str += '<' + node.arg_type + '>'
         print(str)
         for child in node.children:
-            pretty_print(child, depth+1)
+            pretty_print(child, depth + 1)
     except AttributeError:
         print("    " * depth)
 
@@ -328,7 +329,7 @@ def ast2list(node, order='dfs', _list=None, ignore_flag_order=False,
         _list.append(token)
         if node.get_num_of_children() > 0:
             if node.is_utility() and ignore_flag_order:
-                children = sorted(node.children, key=lambda x:x.value)
+                children = sorted(node.children, key=lambda x: x.value)
             else:
                 children = node.children
             for child in children:
@@ -344,13 +345,14 @@ def ast2list(node, order='dfs', _list=None, ignore_flag_order=False,
 
 def paren_parser(line):
     """A simple parser for parenthesized sequence."""
+
     def order_child_fun(node):
         for child in node.children:
             order_child_fun(child)
         if len(node.children) > 1 and node.children[0].value in ["and", "or"]:
             node.children = node.children[:1] + sorted(node.children[1:],
-                    key=lambda x:(x.value if x.kind == "t" else (
-                        x.children[0].value if x.children else x.value)))
+                                                       key=lambda x: (x.value if x.kind == "t" else (
+                                                           x.children[0].value if x.children else x.value)))
 
     if not line.startswith("("):
         line = "( " + line
@@ -389,6 +391,7 @@ def paren_parser(line):
 
     return root
 
+
 # --- Test functions --- #
 
 def batch_parse(input_file):
@@ -402,6 +405,7 @@ def batch_parse(input_file):
             ast = bash_parser(cmd)
             pretty_print(ast)
             i += 1
+
 
 def test_bash_parser():
     while True:
