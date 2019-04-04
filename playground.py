@@ -57,6 +57,10 @@ def print_tokens(cmd):
 
 if __name__ == '__main__':
 
+    cmd = "echo a; echo b"
+    ast = bashlint.data_tools.bash_parser(cmd)
+    print(ast)
+
     cmd = "chmod -R 755 $d"
     print_bast(cmd)
     print_nast(cmd)
@@ -73,8 +77,9 @@ if __name__ == '__main__':
     print_nast(cmd)
     print_tokens(cmd)
 
-    cmd = "echo a"
-
+    cmd = "echo a; echo b"
+    print_bast(cmd)
+    print_nast(cmd)
 
     # input("Wait...")
     ast = bashlint.data_tools.bash_parser(cmd)

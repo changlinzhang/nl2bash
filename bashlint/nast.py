@@ -346,6 +346,14 @@ class WhileNode(Node):
 class ParameterNode(Node):
     num_child = 1
 
-    def __inti__(self, parent=None, lsb=None):
+    def __init__(self, parent=None, lsb=None):
         super(ParameterNode, self).__init__(parent, lsb)
         self.kind = "parameter"
+
+class ListNode(Node):
+    num_child = -1
+
+    def __init__(self, parent=None, lsb=None):
+        super(ListNode, self).__init__(parent, lsb)
+        self.kind = 'list'
+

@@ -667,7 +667,12 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
         elif node.kind == "list":
             if len(node.parts) > 2:
                 # multiple commands, not supported
-                raise ValueError("Unsupported: list of length >= 2")
+                norm_node = ListNode()
+                attach_to_tree(norm_node, current)
+                for pnode in node.parts:
+                    if not pnode.kind == 'operator':
+                        normalize(pnode, norm_node)
+                #    raise ValueError("Unsupported: list of length >= 2")
             else:
                 normalize(node.parts[0], current)
         elif node.kind == "commandsubstitution" or \
@@ -715,7 +720,7 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
             else:
                 raise ValueError("Unsupported : %s" % node.kind)
         elif node.kind == "list":
-            # not supported
+
             raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "if":
             # not supported
