@@ -670,7 +670,6 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
                 norm_node = ListNode()
                 attach_to_tree(norm_node, current)
                 for pnode in node.parts:
-                    if not pnode.kind == 'operator':
                         normalize(pnode, norm_node)
                 #    raise ValueError("Unsupported: list of length >= 2")
             else:
@@ -702,8 +701,9 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
             # not supported
             raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "operator":
-            # not supported
-            raise ValueError("Unsupported: %s" % node.kind)
+            norm_node = OperatorNode(node.op)
+            attach_to_tree(norm_node, current)
+            # raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "parameter":
             norm_node = ParameterNode()
             attach_to_tree(norm_node, current)
