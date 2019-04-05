@@ -357,3 +357,18 @@ class ListNode(Node):
         super(ListNode, self).__init__(parent, lsb)
         self.kind = 'list'
 
+
+class IfThenNode(Node):
+    num_child = 2
+
+    def __init__(self, parent=None, lsb=None):
+        super(IfThenNode, self).__init__(parent, lsb)
+        self.kind = 'ifthen'
+
+
+class IfThenElseNode(Node):
+    num_child = 3
+
+    def __init__(self, parent=None, lsb=None):
+        super(IfThenElseNode, self).__init__(parent, lsb)
+        self.kind = 'ifthenelse'

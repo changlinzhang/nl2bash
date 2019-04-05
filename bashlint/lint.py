@@ -23,11 +23,11 @@ from __future__ import division
 from __future__ import print_function
 
 import copy
-import os
 import re
 import sys
+
 if sys.version_info > (3, 0):
-    from six.moves import xrange
+    pass
 
 # bash grammar
 from bashlint.grammar import *
@@ -283,8 +283,8 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
 
             # If utility grammar is not known, parse into a simple two-level tree
             if not bg.consume(token):
-                raise errors.LintParsingError(
-                    "Warning: grammar not found - utility {}".format(token), num_tokens, 0)
+                #                raise errors.LintParsingError(
+                #                    "Warning: grammar not found - utility {}".format(token), num_tokens, 0)
                 for bast_node in input[1:]:
                     if bast_node.kind == 'word' and (not bast_node.parts
                             or (bast_node.parts[0].kind == 'parameter' and
@@ -693,6 +693,19 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
             attach_to_tree(norm_node, current)
             normalize(node.parts[1], norm_node)
             normalize(node.parts[3], norm_node)
+        elif node.kind == "if":
+            if len(node.parts) > 5:
+                norm_node = IfThenElseNode()
+            else:
+                norm_node = IfThenNode()
+
+            attach_to_tree(norm_node, current)
+
+            normalize(node.parts[1], norm_node)  # if condition
+            normalize(node.parts[3], norm_node)  # then clause
+            if len(node.parts) > 5:
+                normalize(norm_node.parts[5], norm_node)  # else clause
+            # raise ValueError("Unsupported: %s" % node.kind)
         elif hasattr(node, 'parts'):  #XXX: This is a guard line
             for child in node.parts:
                 # skip current node
@@ -715,15 +728,14 @@ def normalize_ast(cmd, recover_quotes=True, verbose=False):
                     normalize(node.list[0], current)
                 elif node.list[0].kind == 'while':
                     normalize(node.list[0], current)
+                elif node.list[0].kind == 'if':
+                    normalize(node.list[0], current)
                 else:
                     raise ValueError("Unsupported Compound: %s" % node.list[0].kind)
             else:
                 raise ValueError("Unsupported : %s" % node.kind)
         elif node.kind == "list":
 
-            raise ValueError("Unsupported: %s" % node.kind)
-        elif node.kind == "if":
-            # not supported
             raise ValueError("Unsupported: %s" % node.kind)
         elif node.kind == "until":
             # not supported

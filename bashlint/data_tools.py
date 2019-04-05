@@ -256,6 +256,19 @@ def ast2tokens(node, loose_constraints=False, ignore_flag_order=False,
             tokens += (to_tokens_fun(node.children[1]))
             tokens.append(";")
             tokens.append("done")
+        elif node.kind in ['ifthen', 'ifthenelse']:
+            tokens.append('if')
+            tokens += to_tokens_fun(node.children[0])
+            tokens.append(';')
+            tokens.append('then')
+            tokens += to_tokens_fun(node.children[1])
+            tokens.append(';')
+            if node.kind == 'ifthenelse':
+                tokens.append('else')
+                tokens += to_tokens_fun(node.children[2])
+                tokens.append(';')
+            tokens.append("fi")
+            tokens.append(";")
         elif node.kind == 'parameter':
             tokens.append('${')
             tokens += to_tokens_fun(node.children[0])

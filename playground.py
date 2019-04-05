@@ -1,10 +1,9 @@
-import bashlint
-from bashlint import data_tools, bast, nast
-from bashlint.lint import safe_bashlex_parse
-import os
-import logging
-import typing as T
 import json
+import logging
+import os
+
+import bashlint
+from bashlint import data_tools, nast
 
 logger = logging.getLogger('playground')
 logger.setLevel(logging.DEBUG)
@@ -41,8 +40,8 @@ def parse_all():
         data_tools.bash_parser(cmd, verbose=True)
 
 
-def print_nast(cmd):
-    ast = bashlint.data_tools.bash_parser(cmd)
+def print_nast(cmd, verbose=False):
+    ast = bashlint.data_tools.bash_parser(cmd, verbose=verbose)
     print(json.dumps(dump_nast(ast), indent=2))
 
 def print_bast(cmd):
@@ -55,8 +54,26 @@ def print_tokens(cmd):
     print(" ".join(tokens))
 
 
-if __name__ == '__main__':
+def output(cmd, verbose=False):
+    print('========command==========')
+    print(cmd)
+    print('==========bast===========')
+    print_bast(cmd)
+    print()
+    print('==========nast===========')
+    print_nast(cmd, verbose=True)
+    print()
+    print('=========tokens==========')
+    print_tokens(cmd)
+    print()
 
+if __name__ == '__main__':
+    cmd = 'export PYTHONPATH=/Users'
+    output(cmd, verbose=True)
+
+    output('export -p')
+
+    exit(0)
     cmd = "echo a; echo b"
     ast = bashlint.data_tools.bash_parser(cmd)
     print(ast)
