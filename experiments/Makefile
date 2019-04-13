@@ -18,14 +18,8 @@ data:
 	
 decode:
 	# Decode candidate outputs of the baseline systems given the pretrained models (on the dev set)
-	## Add '--test' to the end of each command to perform decoding on the test set  
-	./bash-token.sh --decode $(gpu)
-	./bash-token.sh --normalized --fill_argument_slots --decode $(gpu)
-	./bash-copy.sh --decode $(gpu)
-	./bash-partial-token.sh --decode $(gpu)
+	## Add '--test' to the end of each command to perform decoding on the test set
 	./bash-copy-partial-token.sh --decode $(gpu)
-	./bash-char.sh --decode $(gpu)
-	./bash-copy-char.sh --decode $(gpu)	
 	
 gen_evaluation_table:
 	# Generate dev set (manual) evaluation result table
@@ -41,10 +35,6 @@ train:
 	
 	./bash-token.sh
 	./bash-token.sh --normalized --fill_argument_slots
-	./bash-copy.sh
-	./bash-partial-token.sh
 	./bash-copy-partial-token.sh
-	./bash-char.sh
-	./bash-copy-char.sh
 
-results: train decode gen_evaluation_table
+results: train decode gen_auto_evaluation_table

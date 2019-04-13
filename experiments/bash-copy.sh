@@ -12,7 +12,7 @@ ARGS=${@:1}
     --batch_size 128 \
     --sc_token_dim 200 \
     --learning_rate 0.0001 \
-    --steps_per_epoch 4000 \
+    --steps_per_epoch 1000 \
     --tg_token_use_attention \
     --tg_token_attn_fun non-linear \
     --universal_keep 0.6 \
