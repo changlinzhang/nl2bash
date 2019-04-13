@@ -9,13 +9,16 @@ from __future__ import print_function
 
 import collections
 import os, sys
+import re
 sys.path.append('../../')  # for bashlint
 
 from bashlint import bash, data_tools
+from bashlint.bash import BLACK_LIST, GREY_LIST
 
 data_splits = ['train', 'dev', 'test']
 
 NUM_UTILITIES = 100
+
 
 def compute_top_utilities(path, k):
     print('computing top most frequent utilities...') 
@@ -33,8 +36,10 @@ def compute_top_utilities(path, k):
     freq_threshold = -1   
     for u, freq in sorted(utilities.items(), key=lambda x:x[1], reverse=True):
         if freq_threshold > 0 and freq < freq_threshold:
-            break 
-        if u in bash.BLACK_LIST or u in bash.GREY_LIST:
+            break
+        # Xingyu Wei: To udpate for word assignment and control flow,
+        # we remove the Grey List
+        if u in bash.BLACK_LIST:
             continue
         top_utilities.append(u)
         print('{}: {} ({})'.format(len(top_utilities), u, freq))
@@ -43,6 +48,13 @@ def compute_top_utilities(path, k):
     top_utilities = set(top_utilities)
     return top_utilities
 
+def my_check(cm):
+    """
+    my own filterd
+    """
+    pass 
+    
+    
 
 def filter_by_most_frequent_utilities(data_dir, num_utilities):
     def select(ast, utility_set):
@@ -70,7 +82,7 @@ def filter_by_most_frequent_utilities(data_dir, num_utilities):
                     if len(nl.split()) > 50:
                         print('lenthy description skipped: {}'.format(nl))
                         continue
-                    ast = data_tools.bash_parser(cm)
+                    ast = data_tools.bash_parser(cm, verbose=True)
                     if ast and select(ast, top_utilities):
                         nl_outfile.write('{}\n'.format(nl))
                         cm_outfile.write('{}\n'.format(cm))

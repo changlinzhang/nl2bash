@@ -357,7 +357,7 @@ def main(_):
                 FLAGS.fill_argument_slots = True
 
             # save model hyperparameters
-            save_hyperparameters() 
+            # save_hyperparameters()
 
             # Decode the new model on the development set.
             tf.reset_default_graph()

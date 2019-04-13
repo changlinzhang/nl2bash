@@ -41,7 +41,8 @@ class Node(object):
                       'argument',
                       'commandsubstitution',
                       'processsubstitution',
-                      'bracket'
+                      'bracket',
+                      'compound'
                      ]
         :member value: string value of the node
         :member children: list of child nodes
@@ -108,6 +109,9 @@ class Node(object):
 
     def is_root(self):
         return self.kind == "root"
+
+    def is_compound(self):
+        return self.kind == "compound"
 
     def remove_child(self, child):
         if child in self.children:
@@ -316,3 +320,55 @@ class ProcessSubstitutionNode(Node):
             self.value = value
         else:
             raise ValueError("Value of a processsubstitution has to be '<' or '>'.")
+
+class CompoundNode(Node):
+    num_child = -1
+    
+    def __init__(self, value: str, parent=None, lsb=None):
+        super(CompoundNode, self).__init__(parent, lsb)
+        self.kind = "compound"
+        self.value = value
+
+class ForInNode(Node):
+    num_child = 3
+
+    def __init__(self, parent=None, lsb=None):
+        super(ForInNode, self).__init__(parent, lsb)
+        self.kind = "forin"
+
+class WhileNode(Node):
+    num_child = 2
+
+    def __init__(self, parent=None, lsb=None):
+        super(WhileNode, self).__init__(parent, lsb)
+        self.kind = "while"
+
+class ParameterNode(Node):
+    num_child = 1
+
+    def __init__(self, parent=None, lsb=None):
+        super(ParameterNode, self).__init__(parent, lsb)
+        self.kind = "parameter"
+
+class ListNode(Node):
+    num_child = -1
+
+    def __init__(self, parent=None, lsb=None):
+        super(ListNode, self).__init__(parent, lsb)
+        self.kind = 'list'
+
+
+class IfThenNode(Node):
+    num_child = 2
+
+    def __init__(self, parent=None, lsb=None):
+        super(IfThenNode, self).__init__(parent, lsb)
+        self.kind = 'ifthen'
+
+
+class IfThenElseNode(Node):
+    num_child = 3
+
+    def __init__(self, parent=None, lsb=None):
+        super(IfThenElseNode, self).__init__(parent, lsb)
+        self.kind = 'ifthenelse'
