@@ -309,9 +309,23 @@ class EncoderDecoderModel(graph_utils.NNModel):
             else:
                 encoder_decoder_char_loss = 0
 
+            # D. Semantic loss
+            with tf.name_scope('wmc'):
+                normalized_logits = tf.nn.sigmoid(output_logits)
+                wmc_tmp = tf.zeros([self.batch_size, ])
+                for i in range(10):
+                    one_situation = tf.concat(
+                        [tf.concat([tf.ones([self.batch_size, i]), tf.zeros([self.batch_size, 1])], axis=1),
+                         tf.ones([self.batch_size, 10 - i - 1])], axis=1)
+                    wmc_tmp += tf.reduce_prod(one_situation - normalized_logits, axis=1)
+            wmc_tmp = tf.abs(wmc_tmp)
+            wmc = tf.reduce_mean(wmc_tmp)
+            log_wmc = tf.log(wmc)
+
             losses = encoder_decoder_token_loss + \
                      self.gamma * encoder_decoder_char_loss + \
-                     self.beta * attention_reg
+                     self.beta * attention_reg - \
+                     0.0005 * log_wmc
         else:
             losses = tf.zeros_like(decoder_inputs[0])
 
